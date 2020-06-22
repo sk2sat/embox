@@ -120,7 +120,7 @@ struct sai_device *sai_init(void) {
 	MX_DMA_Init();
 	MX_SAI1_Init();
 
-	res = irq_attach(DMA2_Stream1_IRQn + 16, sai_interrupt, 0, &sai_device, "");
+	res = irq_attach(DMA2_Stream1_IRQn, sai_interrupt, 0, &sai_device, "");
 	if (res < 0) {
 		log_error("irq_attach failed errcode %d", res);
 
@@ -165,4 +165,4 @@ int sai_receive(struct sai_device *sai_dev, uint8_t *buf, int length) {
 	return len;
 }
 
-STATIC_IRQ_ATTACH(DMA2_Stream1_IRQn + 16, sai_interrupt, &sai_device);
+STATIC_IRQ_ATTACH(DMA2_Stream1_IRQn, sai_interrupt, &sai_device);
