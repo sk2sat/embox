@@ -18,4 +18,6 @@ extern void adar_preset_pll(struct adar7251_dev *dev);
 /* write down batch of registers */
 extern void adar_preset(struct adar7251_dev *dev);
 
+extern void adar_scan_flash(struct adar7251_dev *dev);
+
 #endif /* PLATFORM_ADAR7251_DRIVERS_ADAR7251_DRIVER_H_ */
