@@ -5,9 +5,9 @@ _________________________________________
 5 i2s sclk          | 6
 7 i2s FS            | 8
 9                   | 10
-11 ADC START        | 12
-13 ADC RESET        | 14 I2S SD (data)
-15                  | 16
+11                  | 12
+13 ADC START        | 14 I2S SD (data)
+15 ADC RESET        | 16
 17                  | 18
 19                  | 20
 
