@@ -35,62 +35,60 @@ static irq_return_t sai_interrupt(unsigned int irq_num, void *dev_id) {
 }
 
 static void sai1_hw_init(SAI_HandleTypeDef *hsai, int channels) {
-  hsai->Instance = SAI1_Block_A;
-  hsai->Init.Protocol = SAI_FREE_PROTOCOL;
-  hsai->Init.AudioMode = SAI_MODESLAVE_RX;
-  switch (channels) {
-  case 2:
-	  hsai->Init.DataSize = SAI_DATASIZE_16;
-  break;
-  case 4:
-	  hsai->Init.DataSize = SAI_DATASIZE_32;
-	  break;
-  default:
-	  log_error("support only 2 or 4 channels");
+	hsai->Instance = SAI1_Block_A;
+	hsai->Init.Protocol = SAI_FREE_PROTOCOL;
+	hsai->Init.AudioMode = SAI_MODESLAVE_RX;
+	switch (channels) {
+	case 2:
+		hsai->Init.DataSize = SAI_DATASIZE_16;
+		break;
+	case 4:
+		hsai->Init.DataSize = SAI_DATASIZE_32;
+		break;
+	default:
+		log_error("support only 2 or 4 channels");
+		return;
+	}
+	hsai->Init.FirstBit = SAI_FIRSTBIT_MSB;
+	hsai->Init.ClockStrobing = SAI_CLOCKSTROBING_FALLINGEDGE;
+	hsai->Init.Synchro = SAI_ASYNCHRONOUS;
+	hsai->Init.OutputDrive = SAI_OUTPUTDRIVE_DISABLE;
+	hsai->Init.FIFOThreshold = SAI_FIFOTHRESHOLD_EMPTY;
+	//hsai->Init.FIFOThreshold = SAI_FIFOTHRESHOLD_1QF;
+	switch (channels) {
+	case 2:
+		hsai->FrameInit.FrameLength = 32;
+		hsai->FrameInit.ActiveFrameLength = 16;
+		break;
+	case 4:
+		hsai->FrameInit.FrameLength = 64;
+		hsai->FrameInit.ActiveFrameLength = 32;
+		break;
+	default:
+		log_error("support only 2 or 4 channels");
+		return;
+	}
+	hsai->FrameInit.FSDefinition = SAI_FS_STARTFRAME;
+	hsai->FrameInit.FSPolarity = SAI_FS_ACTIVE_LOW;
+	hsai->FrameInit.FSOffset = SAI_FS_FIRSTBIT;
+	hsai->SlotInit.FirstBitOffset = 0;
+	switch (channels) {
+	case 2:
+		hsai->SlotInit.SlotSize = SAI_SLOTSIZE_16B;
+		break;
+	case 4:
+		hsai->SlotInit.SlotSize = SAI_SLOTSIZE_32B;
+		break;
+	default:
+		log_error("support only 2 or 4 channels");
+		return;
+	}
 
-	  return;
-  }
-  hsai->Init.FirstBit = SAI_FIRSTBIT_MSB;
-  hsai->Init.ClockStrobing = SAI_CLOCKSTROBING_FALLINGEDGE;
-  hsai->Init.Synchro = SAI_ASYNCHRONOUS;
-  hsai->Init.OutputDrive = SAI_OUTPUTDRIVE_DISABLE;
-  hsai->Init.FIFOThreshold = SAI_FIFOTHRESHOLD_EMPTY;
-  //hsai->Init.FIFOThreshold = SAI_FIFOTHRESHOLD_1QF;
-  switch (channels) {
-  case 2:
-	  hsai->FrameInit.FrameLength = 32;
-	  hsai->FrameInit.ActiveFrameLength = 16;
-	  break;
-  case 4:
-	  hsai->FrameInit.FrameLength = 64;
-	  hsai->FrameInit.ActiveFrameLength = 32;
-	  break;
-  default:
-	  log_error("support only 2 or 4 channels");
-	  return;
-  }
-  hsai->FrameInit.FSDefinition = SAI_FS_STARTFRAME;
-  hsai->FrameInit.FSPolarity = SAI_FS_ACTIVE_LOW;
-  hsai->FrameInit.FSOffset = SAI_FS_FIRSTBIT;
-  hsai->SlotInit.FirstBitOffset = 0;
-  switch (channels) {
-  case 2:
-	  hsai->SlotInit.SlotSize = SAI_SLOTSIZE_16B;
-	  break;
-  case 4:
-	  hsai->SlotInit.SlotSize = SAI_SLOTSIZE_32B;
-	  break;
-  default:
-	  log_error("support only 2 or 4 channels");
-	  return;
-  }
-
-  hsai->SlotInit.SlotNumber = 2;
-  hsai->SlotInit.SlotActive = 0x00000003;
-  if (HAL_SAI_Init(&hsai_BlockA1) != HAL_OK)
-  {
-	  log_error("HAL_SAI_Init faioled");
-  }
+	hsai->SlotInit.SlotNumber = 2;
+	hsai->SlotInit.SlotActive = 0x00000003;
+	if (HAL_SAI_Init(&hsai_BlockA1) != HAL_OK) {
+		log_error("HAL_SAI_Init faioled");
+	}
 }
 
 /**
