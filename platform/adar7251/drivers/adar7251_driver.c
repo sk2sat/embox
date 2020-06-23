@@ -175,6 +175,10 @@ int adar7251_hw_init(struct adar7251_dev *dev) {
 
 	dev->spi_dev->flags = 0;
 
+	return 0;
+}
+
+void adar7251_start(struct adar7251_dev *dev) {
 	gpio_set(ADC_START_PORT, ADC_START_PIN, GPIO_PIN_HIGH);
 
 	adar_ctrl_port_init(dev);
@@ -189,10 +193,7 @@ int adar7251_hw_init(struct adar7251_dev *dev) {
 	sai_start(dev->sai_dev, 4);
 
 	gpio_set(ADC_START_PORT, ADC_START_PIN, GPIO_PIN_LOW);
-
-	return 0;
 }
-
 /* write individual register without readback check */
 void adar_set_reg(struct spi_device *dev, uint16_t addr, uint16_t value) {
 	uint8_t buf_in, buf_out;

@@ -55,6 +55,8 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
+	adar7251_start(&adar7251_dev);
+
 	printf("conversation loop\n");
 
 	while(1) {
