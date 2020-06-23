@@ -52,7 +52,7 @@ static const struct preset preset_pll[] = {
 		{CLK_CTRL, CLK_USE_PLL}
 };
 
-static const struct preset preset[] = {
+static const struct preset preset_4_chacnnels[] = {
 		{ ADC_ROUTING1_4,
 				(LNA_PGA_EQ_BP << ADC1_OFFSET) |\
 				(LNA_PGA_EQ_BP << ADC2_OFFSET) |\
@@ -79,6 +79,34 @@ static const struct preset preset[] = {
 
 		{ ADC_ENABLE, ADC1_EN | ADC2_EN | ADC3_EN | ADC4_EN | LN_PG1_EN |\
 			LN_PG2_EN | LN_PG3_EN | LN_PG4_EN },
+
+		{ MASTER_ENABLE, MASTER_EN }
+};
+
+static const struct preset preset_2_chacnnels[] = {
+		{ ADC_ROUTING1_4,
+				(LNA_PGA_EQ_BP << ADC1_OFFSET) |\
+				(LNA_PGA_EQ_BP << ADC2_OFFSET) |\
+				(LNA_PGA_EQ_BP << ADC3_OFFSET) |\
+				(LNA_PGA_EQ_BP << ADC4_OFFSET) },
+
+		{ DECIM_RATE, RATE_300K },
+
+// TODO: HIGH_PASS
+// TODO: DEJITTER
+
+
+		{ OUTPUT_MODE, OUT_MODE_SERIAL | CONV_START_EN },
+
+		{SERIAL_MODE, TDM_MODE_2PF | DATA_LJF | BCLK_POL_NEG | LRCLK_POL_NEG |\
+             LRCLK_MODE_50X50 | SCLK_MASTER },
+
+		{ SCLK_ADC_PIN, DRIVE_HIGHEST | PIN_PULLDOWN_EN },
+		{ ADC_DOUT0_PIN, DRIVE_HIGHEST | PIN_PULLDOWN_EN },
+		{ ADC_DOUT1_PIN, DRIVE_HIGHEST | PIN_PULLDOWN_EN },
+		{ FS_ADC_PIN, DRIVE_HIGHEST | PIN_PULLDOWN_EN },
+
+		{ ASIL_CLEAR, ASIL_CLEAR_ERR},
 
 		{ MASTER_ENABLE, MASTER_EN }
 };
@@ -132,7 +160,7 @@ static void adar_ctrl_port_init(struct adar7251_dev *adar7251_dev) {
 
 int adar7251_hw_init(struct adar7251_dev *dev) {
 
-	dev->sai_dev = sai_init();
+	dev->sai_dev = sai_init(4);
 
 	gpio_setup_mode(ADC_START_PORT, ADC_START_PIN, GPIO_MODE_OUTPUT);
 	gpio_setup_mode(CS_PORT, CS_PIN, GPIO_MODE_OUTPUT);
@@ -155,7 +183,7 @@ int adar7251_hw_init(struct adar7251_dev *dev) {
 	sleep(1);
 	adar_preset_pll(dev);
 	sleep(1);
-	adar_preset(dev);
+	adar_preset(dev, 4);
 	sleep(1);
 
 	gpio_set(ADC_START_PORT, ADC_START_PIN, GPIO_PIN_LOW);
@@ -222,9 +250,20 @@ void adar_preset_pll(struct adar7251_dev *dev) {
 }
 
 /* write down batch of registers */
-void adar_preset(struct adar7251_dev *dev) {
+void adar_preset(struct adar7251_dev *dev, int channels) {
 	int i;
-	for(i = 0; i < sizeof(preset) / sizeof(preset[0]); i ++) {
+	int len;
+	const struct preset *preset;
+
+	if (channels == 2) {
+		len = sizeof(preset_2_chacnnels) / sizeof(preset_2_chacnnels[0]);
+		preset = preset_2_chacnnels;
+	} else {
+		len = sizeof(preset_4_chacnnels) / sizeof(preset_4_chacnnels[0]);
+		preset = preset_4_chacnnels;
+	}
+
+	for(i = 0; i < len; i ++) {
 		adar_set_reg(dev->spi_dev, preset[i].addr, preset[i].value);
 		log_debug("REG: 0x%04X, DATA write 0x%04X, read 0x%04X",
 				 preset[i].addr, preset[i].value,

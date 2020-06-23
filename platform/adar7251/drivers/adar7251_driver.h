@@ -16,7 +16,7 @@ extern int adar7251_hw_init(struct adar7251_dev *dev);
 extern void adar_preset_pll(struct adar7251_dev *dev);
 
 /* write down batch of registers */
-extern void adar_preset(struct adar7251_dev *dev);
+extern void adar_preset(struct adar7251_dev *dev, int channels);
 
 extern void adar_scan_flash(struct adar7251_dev *dev);
 
