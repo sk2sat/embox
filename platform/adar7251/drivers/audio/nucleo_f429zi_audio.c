@@ -118,7 +118,7 @@ static void sai_gpio_init(void) {
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 }
 
-struct sai_device *sai_init(int channels) {
+struct sai_device *sai_init(void) {
 	int res;
 
 	sai_device.sai_hw_dev = &hsai_BlockA1;
@@ -135,11 +135,13 @@ struct sai_device *sai_init(int channels) {
 		return NULL;
 	}
 
+	return &sai_device;
+}
+
+void sai_start(struct sai_device *sai_dev, int channels) {
 	sai1_hw_init(sai_device.sai_hw_dev, channels);
 
 	HAL_SAI_Receive_DMA(sai_device.sai_hw_dev, (uint8_t *)&sai_device.sai_buf[0], sizeof(sai_device.sai_buf) / 4);
-
-	return &sai_device;
 }
 
 int sai_receive(struct sai_device *sai_dev, uint8_t *buf, int length) {

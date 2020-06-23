@@ -12,7 +12,9 @@
 
 struct sai_device;
 
-extern struct sai_device *sai_init(int channels);
+extern struct sai_device *sai_init(void);
+
+extern void sai_start(struct sai_device *sai_dev, int channels);
 
 extern int sai_receive(struct sai_device *sai_dev, uint8_t *buf, int len);
 

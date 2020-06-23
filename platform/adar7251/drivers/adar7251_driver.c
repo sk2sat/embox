@@ -160,7 +160,7 @@ static void adar_ctrl_port_init(struct adar7251_dev *adar7251_dev) {
 
 int adar7251_hw_init(struct adar7251_dev *dev) {
 
-	dev->sai_dev = sai_init(4);
+	dev->sai_dev = sai_init();
 
 	gpio_setup_mode(ADC_START_PORT, ADC_START_PIN, GPIO_MODE_OUTPUT);
 	gpio_setup_mode(CS_PORT, CS_PIN, GPIO_MODE_OUTPUT);
@@ -185,6 +185,8 @@ int adar7251_hw_init(struct adar7251_dev *dev) {
 	sleep(1);
 	adar_preset(dev, 4);
 	sleep(1);
+
+	sai_start(dev->sai_dev, 4);
 
 	gpio_set(ADC_START_PORT, ADC_START_PIN, GPIO_PIN_LOW);
 
