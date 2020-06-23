@@ -20,32 +20,18 @@
 #include <stm32f4xx_hal.h>
 #include <stm32f4xx_hal_dma.h>
 
-//#include <kernel/printk.h>
-
 #include "adar_sai.h"
 
 struct sai_device sai_device;
 
-SAI_HandleTypeDef hsai_BlockA1;
-DMA_HandleTypeDef hdma_sai1_a;
+static SAI_HandleTypeDef hsai_BlockA1;
 
 static irq_return_t sai_interrupt(unsigned int irq_num, void *dev_id) {
-//	log_debug("ggg");
-//	printk("g\n");
 	HAL_DMA_IRQHandler(hsai_BlockA1.hdmarx);
 	return IRQ_HANDLED;
 }
 
-static void MX_SAI1_Init(int channels)
-{
-
-  /* USER CODE BEGIN SAI1_Init 0 */
-
-  /* USER CODE END SAI1_Init 0 */
-
-  /* USER CODE BEGIN SAI1_Init 1 */
-
-  /* USER CODE END SAI1_Init 1 */
+static void sai1_hw_init(int channels) {
   hsai_BlockA1.Instance = SAI1_Block_A;
   hsai_BlockA1.Init.Protocol = SAI_FREE_PROTOCOL;
   hsai_BlockA1.Init.AudioMode = SAI_MODESLAVE_RX;
@@ -102,26 +88,19 @@ static void MX_SAI1_Init(int channels)
   {
 	  log_error("HAL_SAI_Init faioled");
   }
-  /* USER CODE BEGIN SAI1_Init 2 */
-
-  /* USER CODE END SAI1_Init 2 */
-
 }
 
 /**
   * Enable DMA controller clock
   */
-static void MX_DMA_Init(void)
-{
+static void sai1_dma_init(void) {
+	/* DMA controller clock enable */
+	__HAL_RCC_DMA2_CLK_ENABLE();
 
-  /* DMA controller clock enable */
-  __HAL_RCC_DMA2_CLK_ENABLE();
-
-  /* DMA interrupt init */
-  /* DMA2_Stream1_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
-
+	/* DMA interrupt init */
+	/* DMA2_Stream1_IRQn interrupt configuration */
+	HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
 }
 
 /**
@@ -129,16 +108,13 @@ static void MX_DMA_Init(void)
   * @param None
   * @retval None
   */
-static void MX_GPIO_Init(void)
-{
-
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOE_CLK_ENABLE();
-  __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-
+static void sai_gpio_init(void) {
+	/* GPIO Ports Clock Enable */
+	__HAL_RCC_GPIOE_CLK_ENABLE();
+	__HAL_RCC_GPIOH_CLK_ENABLE();
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+	__HAL_RCC_GPIOD_CLK_ENABLE();
+	__HAL_RCC_GPIOB_CLK_ENABLE();
 }
 
 struct sai_device *sai_init(int channels) {
@@ -148,10 +124,8 @@ struct sai_device *sai_init(int channels) {
 	sai_device.sai_cur_buf = NULL;
 
 	/* Initialize all configured peripherals */
-	MX_GPIO_Init();
-	MX_DMA_Init();
-	MX_SAI1_Init(channels);
-
+	sai_gpio_init();
+	sai1_dma_init();
 	res = irq_attach(DMA2_Stream1_IRQn, sai_interrupt, 0, &sai_device, "");
 	if (res < 0) {
 		log_error("irq_attach failed errcode %d", res);
@@ -159,12 +133,12 @@ struct sai_device *sai_init(int channels) {
 		return NULL;
 	}
 
+	sai1_hw_init(channels);
 
 	HAL_SAI_Receive_DMA(&hsai_BlockA1, (uint8_t *)&sai_device.sai_buf[0], sizeof(sai_device.sai_buf) / 4);
 
 	return &sai_device;
 }
-
 
 int sai_receive(struct sai_device *sai_dev, uint8_t *buf, int length) {
 	int res;
@@ -175,17 +149,12 @@ int sai_receive(struct sai_device *sai_dev, uint8_t *buf, int length) {
 	sai_dev->sai_thread = thread_self();
 	sai_dev->sai_cur_buf = NULL;
 	sai_dev->sai_active = 1;
-#if 1
+
 	res  = SCHED_WAIT_TIMEOUT(sai_dev->sai_cur_buf, 1000000);
 	if (res != 0) {
 		log_error("timeout");
 		return 0;
 	}
-#else
-	while (sai_dev->sai_cur_buf == NULL);
-#endif
-
-//	assert(sai_dev->sai_cur_buf);
 
 	cur_buf = (uint8_t *)sai_dev->sai_cur_buf;
 	sai_dev->sai_cur_buf = NULL;

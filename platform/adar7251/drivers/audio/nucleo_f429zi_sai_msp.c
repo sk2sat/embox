@@ -9,7 +9,7 @@
 #include <stm32f4xx_hal.h>
 #include <stm32f4xx_hal_dma.h>
 
-extern DMA_HandleTypeDef hdma_sai1_a;
+static DMA_HandleTypeDef hdma_sai1_a;
 
 static uint32_t SAI1_client = 0;
 
