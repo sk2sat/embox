@@ -27,63 +27,66 @@ struct sai_device sai_device;
 static SAI_HandleTypeDef hsai_BlockA1;
 
 static irq_return_t sai_interrupt(unsigned int irq_num, void *dev_id) {
-	HAL_DMA_IRQHandler(hsai_BlockA1.hdmarx);
+	struct sai_device *dev = dev_id;
+
+	HAL_DMA_IRQHandler(dev->sai_hw_dev->hdmarx);
+
 	return IRQ_HANDLED;
 }
 
-static void sai1_hw_init(int channels) {
-  hsai_BlockA1.Instance = SAI1_Block_A;
-  hsai_BlockA1.Init.Protocol = SAI_FREE_PROTOCOL;
-  hsai_BlockA1.Init.AudioMode = SAI_MODESLAVE_RX;
+static void sai1_hw_init(SAI_HandleTypeDef *hsai, int channels) {
+  hsai->Instance = SAI1_Block_A;
+  hsai->Init.Protocol = SAI_FREE_PROTOCOL;
+  hsai->Init.AudioMode = SAI_MODESLAVE_RX;
   switch (channels) {
   case 2:
-	  hsai_BlockA1.Init.DataSize = SAI_DATASIZE_16;
+	  hsai->Init.DataSize = SAI_DATASIZE_16;
   break;
   case 4:
-	  hsai_BlockA1.Init.DataSize = SAI_DATASIZE_32;
+	  hsai->Init.DataSize = SAI_DATASIZE_32;
 	  break;
   default:
 	  log_error("support only 2 or 4 channels");
 
 	  return;
   }
-  hsai_BlockA1.Init.FirstBit = SAI_FIRSTBIT_MSB;
-  hsai_BlockA1.Init.ClockStrobing = SAI_CLOCKSTROBING_FALLINGEDGE;
-  hsai_BlockA1.Init.Synchro = SAI_ASYNCHRONOUS;
-  hsai_BlockA1.Init.OutputDrive = SAI_OUTPUTDRIVE_DISABLE;
-  hsai_BlockA1.Init.FIFOThreshold = SAI_FIFOTHRESHOLD_EMPTY;
-  //hsai_BlockA1.Init.FIFOThreshold = SAI_FIFOTHRESHOLD_1QF;
+  hsai->Init.FirstBit = SAI_FIRSTBIT_MSB;
+  hsai->Init.ClockStrobing = SAI_CLOCKSTROBING_FALLINGEDGE;
+  hsai->Init.Synchro = SAI_ASYNCHRONOUS;
+  hsai->Init.OutputDrive = SAI_OUTPUTDRIVE_DISABLE;
+  hsai->Init.FIFOThreshold = SAI_FIFOTHRESHOLD_EMPTY;
+  //hsai->Init.FIFOThreshold = SAI_FIFOTHRESHOLD_1QF;
   switch (channels) {
   case 2:
-	  hsai_BlockA1.FrameInit.FrameLength = 32;
-	  hsai_BlockA1.FrameInit.ActiveFrameLength = 16;
+	  hsai->FrameInit.FrameLength = 32;
+	  hsai->FrameInit.ActiveFrameLength = 16;
 	  break;
   case 4:
-	  hsai_BlockA1.FrameInit.FrameLength = 64;
-	  hsai_BlockA1.FrameInit.ActiveFrameLength = 32;
+	  hsai->FrameInit.FrameLength = 64;
+	  hsai->FrameInit.ActiveFrameLength = 32;
 	  break;
   default:
 	  log_error("support only 2 or 4 channels");
 	  return;
   }
-  hsai_BlockA1.FrameInit.FSDefinition = SAI_FS_STARTFRAME;
-  hsai_BlockA1.FrameInit.FSPolarity = SAI_FS_ACTIVE_LOW;
-  hsai_BlockA1.FrameInit.FSOffset = SAI_FS_FIRSTBIT;
-  hsai_BlockA1.SlotInit.FirstBitOffset = 0;
+  hsai->FrameInit.FSDefinition = SAI_FS_STARTFRAME;
+  hsai->FrameInit.FSPolarity = SAI_FS_ACTIVE_LOW;
+  hsai->FrameInit.FSOffset = SAI_FS_FIRSTBIT;
+  hsai->SlotInit.FirstBitOffset = 0;
   switch (channels) {
   case 2:
-	  hsai_BlockA1.SlotInit.SlotSize = SAI_SLOTSIZE_16B;
+	  hsai->SlotInit.SlotSize = SAI_SLOTSIZE_16B;
 	  break;
   case 4:
-	  hsai_BlockA1.SlotInit.SlotSize = SAI_SLOTSIZE_32B;
+	  hsai->SlotInit.SlotSize = SAI_SLOTSIZE_32B;
 	  break;
   default:
 	  log_error("support only 2 or 4 channels");
 	  return;
   }
 
-  hsai_BlockA1.SlotInit.SlotNumber = 2;
-  hsai_BlockA1.SlotInit.SlotActive = 0x00000003;
+  hsai->SlotInit.SlotNumber = 2;
+  hsai->SlotInit.SlotActive = 0x00000003;
   if (HAL_SAI_Init(&hsai_BlockA1) != HAL_OK)
   {
 	  log_error("HAL_SAI_Init faioled");
@@ -120,6 +123,7 @@ static void sai_gpio_init(void) {
 struct sai_device *sai_init(int channels) {
 	int res;
 
+	sai_device.sai_hw_dev = &hsai_BlockA1;
 	sai_device.sai_active = 0;
 	sai_device.sai_cur_buf = NULL;
 
@@ -133,9 +137,9 @@ struct sai_device *sai_init(int channels) {
 		return NULL;
 	}
 
-	sai1_hw_init(channels);
+	sai1_hw_init(sai_device.sai_hw_dev, channels);
 
-	HAL_SAI_Receive_DMA(&hsai_BlockA1, (uint8_t *)&sai_device.sai_buf[0], sizeof(sai_device.sai_buf) / 4);
+	HAL_SAI_Receive_DMA(sai_device.sai_hw_dev, (uint8_t *)&sai_device.sai_buf[0], sizeof(sai_device.sai_buf) / 4);
 
 	return &sai_device;
 }

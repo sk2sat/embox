@@ -22,10 +22,10 @@ struct sai_device {
 
 	volatile int sai_active;
 	volatile uint8_t *sai_cur_buf;
+
+	struct __SAI_HandleTypeDef *sai_hw_dev;
 };
 
 extern struct sai_device sai_device;
-
-extern int sai_thread_init(struct sai_device *sai_device);
 
 #endif /* PLATFORM_ADAR7251_DRIVERS_AUDIO_ADAR_SAI_H_ */
