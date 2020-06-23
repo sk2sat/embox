@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 #include <drivers/adar7251_driver.h>
 #include <drivers/nucleo_f429zi_audio.h>
@@ -19,17 +20,19 @@ static char buf[BUFLEN];
 int main(int argc, char **argv) {
 	int data_len;
 	struct sockaddr_in si_me, si_other;
-	int s, slen=sizeof(si_other);
+	int s, slen;
+	int port;
 
-	int port = PORT;
-
-	if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1) {
-		printf("socket() failed");
-		return -1;
-	}
+	slen = sizeof(si_other);
+	port = PORT;
 
 	if (argc > 1) {
 		port = atoi(argv[1]);
+	}
+
+	if ((s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1) {
+		printf("socket() failed");
+		return -1;
 	}
 
 	memset((char *) &si_me, 0, sizeof(si_me));
@@ -38,6 +41,7 @@ int main(int argc, char **argv) {
 	si_me.sin_port = htons(port);
 	si_me.sin_addr.s_addr = htonl(INADDR_ANY);
 	if (bind(s, (void *) &si_me, sizeof(si_me))==-1) {
+		close(s);
 		return -1;
 	}
 
@@ -47,6 +51,7 @@ int main(int argc, char **argv) {
 	printf("waiting UDP packet on port %d\n", port);
 	if (recvfrom(s, buf, BUFLEN, 0, (void *)&si_other, &slen)==-1){
 		printf("recvfrom() failed");
+		close(s);
 		return 0;
 	}
 
@@ -58,7 +63,7 @@ int main(int argc, char **argv) {
 			printf("sai timeout\n");
 			continue;
 		}
-		//printf("%d\n", data_len);
+
 		if (sendto(s, rx_buf, data_len, 0, (void *) &si_other, slen)==-1) {
 			printf("sendto() failed");
 		}
