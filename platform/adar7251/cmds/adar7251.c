@@ -55,6 +55,8 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
+	adar7251_prepare(&adar7251_dev, 2);
+
 	adar7251_start(&adar7251_dev);
 
 	printf("conversation loop\n");
@@ -67,6 +69,7 @@ int main(int argc, char **argv) {
 		}
 
 		if (sendto(s, rx_buf, data_len, 0, (void *) &si_other, slen)==-1) {
+			adar7251_stop(&adar7251_dev);
 			printf("sendto() failed");
 		}
 	}

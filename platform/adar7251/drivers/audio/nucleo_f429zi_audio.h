@@ -16,6 +16,8 @@ extern struct sai_device *sai_init(void);
 
 extern void sai_start(struct sai_device *sai_dev, int channels);
 
+extern void sai_stop(struct sai_device *sai_dev);
+
 extern int sai_receive(struct sai_device *sai_dev, uint8_t *buf, int len);
 
 #define SAI_SAMPLES_BUFFER 0x200

@@ -149,6 +149,11 @@ void sai_start(struct sai_device *sai_dev, int channels) {
 	HAL_SAI_Receive_DMA(sai_device.sai_hw_dev, (uint8_t *)&sai_device.sai_buf[0], sizeof(sai_device.sai_buf) / 4);
 }
 
+void sai_stop(struct sai_device *sai_dev) {
+	HAL_SAI_DMAStop(sai_device.sai_hw_dev);
+	HAL_SAI_DeInit(sai_device.sai_hw_dev);
+}
+
 int sai_receive(struct sai_device *sai_dev, uint8_t *buf, int length) {
 	int res;
 	int len;

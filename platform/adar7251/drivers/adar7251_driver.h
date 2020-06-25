@@ -18,6 +18,8 @@ struct adar7251_dev {
 
 extern int adar7251_hw_init(struct adar7251_dev *dev);
 
+extern void adar7251_prepare(struct adar7251_dev *dev, int ch_num);
+
 extern void adar7251_start(struct adar7251_dev *dev);
 
 /* write down batch of registers */
