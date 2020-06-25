@@ -20,7 +20,12 @@
 #include <stm32f4xx_hal.h>
 #include <stm32f4xx_hal_dma.h>
 
+#include <framework/mod/options.h>
+
 #include "adar_sai.h"
+
+
+#define IRQ_NUM     OPTION_GET(NUMBER,irq_num)
 
 struct sai_device sai_device;
 
@@ -168,4 +173,4 @@ int sai_receive(struct sai_device *sai_dev, uint8_t *buf, int length) {
 	return len;
 }
 
-STATIC_IRQ_ATTACH(DMA2_Stream1_IRQn, sai_interrupt, &sai_device);
+STATIC_IRQ_ATTACH(IRQ_NUM, sai_interrupt, &sai_device);
