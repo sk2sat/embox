@@ -58,8 +58,8 @@ static void sai1_hw_init(SAI_HandleTypeDef *hsai, int channels) {
 	hsai->Init.ClockStrobing = SAI_CLOCKSTROBING_FALLINGEDGE;
 	hsai->Init.Synchro = SAI_ASYNCHRONOUS;
 	hsai->Init.OutputDrive = SAI_OUTPUTDRIVE_DISABLE;
-	hsai->Init.FIFOThreshold = SAI_FIFOTHRESHOLD_EMPTY;
-	//hsai->Init.FIFOThreshold = SAI_FIFOTHRESHOLD_1QF;
+	//hsai->Init.FIFOThreshold = SAI_FIFOTHRESHOLD_EMPTY;
+	hsai->Init.FIFOThreshold = SAI_FIFOTHRESHOLD_3QF;
 	switch (channels) {
 	case 2:
 		hsai->FrameInit.FrameLength = 32;
@@ -143,10 +143,20 @@ struct sai_device *sai_init(void) {
 	return &sai_device;
 }
 
-void sai_start(struct sai_device *sai_dev, int channels) {
+void sai_prepare(struct sai_device *sai_dev, int channels) {
 	sai1_hw_init(sai_device.sai_hw_dev, channels);
 
+}
+
+void sai_start(struct sai_device *sai_dev, int channels) {
+
+	sai_dev->buf_num = 0;
+
 	HAL_SAI_Receive_DMA(sai_device.sai_hw_dev, (uint8_t *)&sai_device.sai_buf[0], sizeof(sai_device.sai_buf) / 4);
+
+//	sai_dev->sai_cur_buf = NULL;
+//	sai_dev->sai_active = 1;
+	sai_dev->buf_num = 0;
 }
 
 void sai_stop(struct sai_device *sai_dev) {
@@ -161,6 +171,7 @@ int sai_receive(struct sai_device *sai_dev, uint8_t *buf, int length) {
 
 	len = min(length, sizeof(sai_dev->sai_buf) / 2);
 	sai_dev->sai_thread = thread_self();
+
 	sai_dev->sai_cur_buf = NULL;
 	sai_dev->sai_active = 1;
 

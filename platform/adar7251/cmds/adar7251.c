@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
-	adar7251_prepare(&adar7251_dev, 2);
+	adar7251_prepare(&adar7251_dev, 4);
 
 	adar7251_start(&adar7251_dev);
 

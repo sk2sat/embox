@@ -14,6 +14,8 @@ struct sai_device;
 
 extern struct sai_device *sai_init(void);
 
+extern void sai_prepare(struct sai_device *sai_dev, int channels);
+
 extern void sai_start(struct sai_device *sai_dev, int channels);
 
 extern void sai_stop(struct sai_device *sai_dev);

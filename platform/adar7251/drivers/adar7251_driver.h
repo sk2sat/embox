@@ -22,6 +22,8 @@ extern void adar7251_prepare(struct adar7251_dev *dev, int ch_num);
 
 extern void adar7251_start(struct adar7251_dev *dev);
 
+extern void adar7251_stop(struct adar7251_dev *dev);
+
 /* write down batch of registers */
 extern void adar_preset_pll(struct adar7251_dev *dev);
 
@@ -29,5 +31,8 @@ extern void adar_preset_pll(struct adar7251_dev *dev);
 extern void adar_preset(struct adar7251_dev *dev, int channels);
 
 extern void adar_scan_flash(struct adar7251_dev *dev);
+
+#define TEST_BUF_PORT       GPIO_PORT_C
+#define TEST_BUF_PIN        (1 << 13)
 
 #endif /* PLATFORM_ADAR7251_DRIVERS_ADAR7251_DRIVER_H_ */

@@ -22,6 +22,7 @@ struct sai_device {
 
 	volatile int sai_active;
 	volatile uint8_t *sai_cur_buf;
+	volatile int buf_num;
 
 	struct __SAI_HandleTypeDef *sai_hw_dev;
 };

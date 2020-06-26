@@ -14,6 +14,9 @@
 #include <kernel/thread.h>
 #include <kernel/sched.h>
 
+#include <drivers/adar7251_driver.h>
+#include <drivers/gpio/gpio.h>
+
 #include "adar_sai.h"
 
 void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai) {
@@ -27,8 +30,14 @@ void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai) {
 		log_error("!!!!!!!!!!!!!!!!SAI OVERFLOW!!!!!!!!!!!!!!!");
 		return;
 	}
+	if (sai_device.buf_num & 0x1) {
+		log_error(">>>>>> SAI OVERFLOW %d", sai_device.buf_num);
+	}
+	sai_device.buf_num ++;
+
 	sai_device.sai_cur_buf = (void *)&sai_device.sai_buf[SAI_SAMPLES_BUFFER / 2];
 
+//	gpio_set(TEST_BUF_PORT, TEST_BUF_PIN, GPIO_PIN_HIGH);
 	sched_wakeup(&sai_device.sai_thread->schedee);
 }
 
@@ -49,7 +58,15 @@ void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai) {
 		log_error("!!!!!!!!!!!!!!!!SAI OVERFLOW!!!!!!!!!!!!!!!");
 		return;
 	}
+	if (!(sai_device.buf_num & 0x1)) {
+		log_error(">>>>>> SAI OVERFLOW %d", sai_device.buf_num);
+	}
+	sai_device.buf_num ++;
+
 	sai_device.sai_cur_buf = (void *) &sai_device.sai_buf[0];
+
+	//gpio_set(TEST_BUF_PORT, TEST_BUF_PIN, GPIO_PIN_LOW);
+
 	sched_wakeup(&sai_device.sai_thread->schedee);
 }
 

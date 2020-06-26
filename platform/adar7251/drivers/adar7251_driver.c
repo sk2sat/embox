@@ -166,6 +166,8 @@ int adar7251_hw_init(struct adar7251_dev *dev) {
 	gpio_setup_mode(CS_PORT, CS_PIN, GPIO_MODE_OUTPUT);
 	gpio_setup_mode(RESET_PORT, RESET_PIN, GPIO_MODE_OUTPUT);
 
+	gpio_setup_mode(TEST_BUF_PORT, TEST_BUF_PIN, GPIO_MODE_OUTPUT);
+
 	dev->spi_bus = SPI_BUS_NUM;
 
 	dev->spi_dev = spi_dev_by_id(dev->spi_bus);
@@ -190,15 +192,18 @@ void adar7251_prepare(struct adar7251_dev *dev, int ch_num) {
 	adar_preset(dev, ch_num);
 	sleep(1);
 
-	sai_start(dev->sai_dev, ch_num);
+	sai_prepare(dev->sai_dev, ch_num);
 }
 
 void adar7251_start(struct adar7251_dev *dev) {
+	sai_start(dev->sai_dev, 0);
+
 	gpio_set(ADC_START_PORT, ADC_START_PIN, GPIO_PIN_LOW);
 }
 
 void adar7251_stop(struct adar7251_dev *dev) {
 	gpio_set(ADC_START_PORT, ADC_START_PIN, GPIO_PIN_HIGH);
+
 	sai_stop(dev->sai_dev);
 }
 

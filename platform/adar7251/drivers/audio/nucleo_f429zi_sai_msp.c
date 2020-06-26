@@ -54,7 +54,7 @@ void HAL_SAI_MspInit(SAI_HandleTypeDef* hsai)
     hdma_sai1_a.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
 #else
     hdma_sai1_a.Init.Mode                = DMA_CIRCULAR;
-    hdma_sai1_a.Init.Priority            = DMA_PRIORITY_HIGH;
+    hdma_sai1_a.Init.Priority            = DMA_PRIORITY_LOW; // DMA_PRIORITY_HIGH;
     hdma_sai1_a.Init.FIFOMode            = DMA_FIFOMODE_DISABLE;
     hdma_sai1_a.Init.FIFOThreshold       = DMA_FIFO_THRESHOLD_FULL;
     hdma_sai1_a.Init.MemBurst            = DMA_MBURST_SINGLE;
