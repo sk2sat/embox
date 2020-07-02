@@ -28,6 +28,7 @@ int main(int argc, char **argv) {
 	struct sockaddr_in si_me, si_other;
 	int s, slen;
 	int port;
+	int rlen;
 
 	slen = sizeof(si_other);
 	port = PORT;
@@ -58,27 +59,36 @@ int main(int argc, char **argv) {
 	printf("configure as 4 channels ADC\n");
 	adar7251_prepare(&adar7251_dev, 4);
 
-	printf("waiting UDP packet on port %d\n", port);
-	if (recvfrom(s, buf, BUFLEN, 0, (void *)&si_other, &slen)==-1){
-		printf("recvfrom() failed");
-		close(s);
-		return 0;
-	}
-
-	adar7251_start(&adar7251_dev);
-
-	printf("conversation loop\n");
-
 	while(1) {
-		data_len = sai_receive(adar7251_dev.sai_dev, rx_buf, sizeof(rx_buf));
-		if (data_len == 0) {
-			printf("sai timeout\n");
+		printf("waiting UDP packet on port %d\n", port);
+
+		rlen = recvfrom(s, buf, BUFLEN, 0, (void *)&si_other, &slen) ;
+		if (rlen == -1){
+			printf("recvfrom() failed");
+			close(s);
+			return 0;
+		}
+		if (memcmp(buf, ADAR_PACKET_LABEL, sizeof(ADAR_PACKET_LABEL))) {
+			printf("wrong label must be '%s'\n", ADAR_PACKET_LABEL);
 			continue;
 		}
 
-		if (sendto(s, rx_buf, data_len, 0, (void *) &si_other, slen)==-1) {
-			adar7251_stop(&adar7251_dev);
-			printf("sendto() failed");
+		adar7251_start(&adar7251_dev);
+
+		printf("conversation loop\n");
+
+		while(1) {
+			data_len = sai_receive(adar7251_dev.sai_dev, rx_buf, sizeof(rx_buf));
+			if (data_len == 0) {
+				printf("sai timeout\n");
+				continue;
+			}
+
+			if (sendto(s, rx_buf, data_len, 0, (void *) &si_other, slen)==-1) {
+				adar7251_stop(&adar7251_dev);
+				printf("sendto() failed");
+				break;
+			}
 		}
 	}
 
