@@ -85,6 +85,8 @@ int main(int argc, char **argv) {
 
 			printf("conversation loop\n");
 
+			adar7251_frame_start(&adar7251_dev);
+
 			while(1) {
 				data_len = sai_receive(adar7251_dev.sai_dev, rx_buf, sizeof(rx_buf));
 				if (data_len == 0) {

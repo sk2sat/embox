@@ -198,7 +198,7 @@ void adar7251_prepare(struct adar7251_dev *dev, int ch_num) {
 void adar7251_start(struct adar7251_dev *dev) {
 	sai_start(dev->sai_dev, 0);
 
-	gpio_set(ADC_START_PORT, ADC_START_PIN, GPIO_PIN_LOW);
+	//gpio_set(ADC_START_PORT, ADC_START_PIN, GPIO_PIN_LOW);
 }
 
 void adar7251_stop(struct adar7251_dev *dev) {
