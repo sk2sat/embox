@@ -23,12 +23,37 @@ static char buf[BUFLEN];
 #define ADAR_CMD_GET_STATUS  (0x03)
 #define ADAR_CMD_START       (0x04)
 
-int main(int argc, char **argv) {
+
+static inline int frame_send(int s, struct sockaddr_in *si_other, socklen_t slen) {
+	int i;
 	int data_len;
+
+	adar7251_frame_start(&adar7251_dev);
+	for (i = 0; i < 96; i ++) {
+		data_len = sai_receive(adar7251_dev.sai_dev, rx_buf, sizeof(rx_buf));
+		if (data_len == 0) {
+			printf("sai timeout\n");
+			continue;
+		}
+
+		if (sendto(s, rx_buf, data_len, 0, (void *) si_other, slen)==-1) {
+			adar7251_frame_stop(&adar7251_dev);
+			adar7251_stop(&adar7251_dev);
+			printf("sendto() failed");
+			return -1;
+		}
+	}
+	adar7251_frame_stop(&adar7251_dev);
+	return 0;
+}
+
+int main(int argc, char **argv) {
+
 	struct sockaddr_in si_me, si_other;
-	int s, slen;
+	int s;
+	socklen_t slen;
 	int port;
-	int rlen;
+	ssize_t rlen;
 
 	slen = sizeof(si_other);
 	port = PORT;
@@ -80,26 +105,22 @@ int main(int argc, char **argv) {
 			break;
 		case ADAR_CMD_START:
 		{
+			int i;
+			int len;
+			len = buf[sizeof(ADAR_PACKET_LABEL) + 1];
+			printf("conversation loop %d frames\n", len);
 
 			adar7251_start(&adar7251_dev);
-
-			printf("conversation loop\n");
-
 			adar7251_frame_start(&adar7251_dev);
 
-			while(1) {
-				data_len = sai_receive(adar7251_dev.sai_dev, rx_buf, sizeof(rx_buf));
-				if (data_len == 0) {
-					printf("sai timeout\n");
-					continue;
-				}
-
-				if (sendto(s, rx_buf, data_len, 0, (void *) &si_other, slen)==-1) {
-					adar7251_stop(&adar7251_dev);
-					printf("sendto() failed");
+			for (i = 0; i < len; i ++) {
+				if (frame_send(s, &si_other, slen)) {
+					printf("fatal error");
 					break;
 				}
 			}
+			adar7251_frame_stop(&adar7251_dev);
+			adar7251_stop(&adar7251_dev);
 		}
 		break;
 		default:
