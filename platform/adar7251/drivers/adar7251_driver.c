@@ -207,6 +207,15 @@ void adar7251_stop(struct adar7251_dev *dev) {
 	sai_stop(dev->sai_dev);
 }
 
+void adar7251_frame_start(struct adar7251_dev *dev) {
+
+	gpio_set(ADC_START_PORT, ADC_START_PIN, GPIO_PIN_LOW);
+}
+
+void adar7251_frame_stop(struct adar7251_dev *dev) {
+	gpio_set(ADC_START_PORT, ADC_START_PIN, GPIO_PIN_HIGH);
+}
+
 /* write individual register without readback check */
 void adar_set_reg(struct spi_device *dev, uint16_t addr, uint16_t value) {
 	uint8_t buf_in, buf_out;

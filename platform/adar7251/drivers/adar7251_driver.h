@@ -14,6 +14,7 @@ struct adar7251_dev {
 	struct sai_device *sai_dev;
 
 	struct adar_config conf;
+	int status;
 };
 
 extern int adar7251_hw_init(struct adar7251_dev *dev);
@@ -23,6 +24,10 @@ extern void adar7251_prepare(struct adar7251_dev *dev, int ch_num);
 extern void adar7251_start(struct adar7251_dev *dev);
 
 extern void adar7251_stop(struct adar7251_dev *dev);
+
+extern void adar7251_frame_start(struct adar7251_dev *dev);
+
+extern void adar7251_frame_stop(struct adar7251_dev *dev);
 
 /* write down batch of registers */
 extern void adar_preset_pll(struct adar7251_dev *dev);
