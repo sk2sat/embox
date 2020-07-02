@@ -17,6 +17,12 @@ static uint8_t rx_buf[SAI_SAMPLES_BUFFER * 2]; /* half of sai buffer */
 static struct adar7251_dev adar7251_dev;
 static char buf[BUFLEN];
 
+#define ADAR_PACKET_LABEL    "ADAR"
+#define ADAR_CMD_SET_CONF    (0x01)
+#define ADAR_CMD_GET_CONF    (0x02)
+#define ADAR_CMD_GET_STATUS  (0x03)
+#define ADAR_CMD_START       (0x04)
+
 int main(int argc, char **argv) {
 	int data_len;
 	struct sockaddr_in si_me, si_other;
@@ -30,7 +36,8 @@ int main(int argc, char **argv) {
 		port = atoi(argv[1]);
 	}
 
-	if ((s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1) {
+	s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (s == -1) {
 		printf("socket() failed");
 		return -1;
 	}
@@ -48,14 +55,15 @@ int main(int argc, char **argv) {
 	printf("starting adar7251\n");
 	adar7251_hw_init(&adar7251_dev);
 
+	printf("configure as 4 channels ADC\n");
+	adar7251_prepare(&adar7251_dev, 4);
+
 	printf("waiting UDP packet on port %d\n", port);
 	if (recvfrom(s, buf, BUFLEN, 0, (void *)&si_other, &slen)==-1){
 		printf("recvfrom() failed");
 		close(s);
 		return 0;
 	}
-
-	adar7251_prepare(&adar7251_dev, 4);
 
 	adar7251_start(&adar7251_dev);
 
