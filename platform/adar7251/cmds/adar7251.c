@@ -73,23 +73,38 @@ int main(int argc, char **argv) {
 			continue;
 		}
 
-		adar7251_start(&adar7251_dev);
+		switch(buf[sizeof(ADAR_PACKET_LABEL)]) {
+		case ADAR_CMD_SET_CONF:
+			printf("configure as 4 channels ADC\n");
+			adar7251_prepare(&adar7251_dev, 4);
+			break;
+		case ADAR_CMD_START:
+		{
 
-		printf("conversation loop\n");
+			adar7251_start(&adar7251_dev);
 
-		while(1) {
-			data_len = sai_receive(adar7251_dev.sai_dev, rx_buf, sizeof(rx_buf));
-			if (data_len == 0) {
-				printf("sai timeout\n");
-				continue;
-			}
+			printf("conversation loop\n");
 
-			if (sendto(s, rx_buf, data_len, 0, (void *) &si_other, slen)==-1) {
-				adar7251_stop(&adar7251_dev);
-				printf("sendto() failed");
-				break;
+			while(1) {
+				data_len = sai_receive(adar7251_dev.sai_dev, rx_buf, sizeof(rx_buf));
+				if (data_len == 0) {
+					printf("sai timeout\n");
+					continue;
+				}
+
+				if (sendto(s, rx_buf, data_len, 0, (void *) &si_other, slen)==-1) {
+					adar7251_stop(&adar7251_dev);
+					printf("sendto() failed");
+					break;
+				}
 			}
 		}
+		break;
+		default:
+			printf("wrong command %d", buf[sizeof(ADAR_PACKET_LABEL)]);
+			break;
+		}
+
 	}
 
 	return 0;
