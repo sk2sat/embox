@@ -30,7 +30,7 @@ void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai) {
 		log_error("!!!!!!!!!!!!!!!!SAI OVERFLOW!!!!!!!!!!!!!!!");
 		return;
 	}
-	if (sai_device.buf_num & 0x1) {
+	if (!(sai_device.buf_num & 0x1)) {
 		log_error(">>>>>> SAI OVERFLOW %d", sai_device.buf_num);
 	}
 	sai_device.buf_num ++;
@@ -58,7 +58,7 @@ void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai) {
 		log_error("!!!!!!!!!!!!!!!!SAI OVERFLOW!!!!!!!!!!!!!!!");
 		return;
 	}
-	if (!(sai_device.buf_num & 0x1)) {
+	if ((sai_device.buf_num & 0x1)) {
 		log_error(">>>>>> SAI OVERFLOW %d", sai_device.buf_num);
 	}
 	sai_device.buf_num ++;
@@ -80,7 +80,7 @@ void HAL_SAI_ErrorCallback(SAI_HandleTypeDef *hsai)
 {
 /* Prevent unused argument(s) compilation warning */
 UNUSED(hsai);
-	log_error("!!!!!!!!!!!!!!");
+	log_error("+++");
 
 /* NOTE : This function should not be modified, when the callback is needed,
           the HAL_SAI_ErrorCallback could be implemented in the user file
