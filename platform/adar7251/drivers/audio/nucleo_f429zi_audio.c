@@ -151,6 +151,7 @@ void sai_prepare(struct sai_device *sai_dev, int channels) {
 void sai_start(struct sai_device *sai_dev, int channels) {
 	sai_dev->sai_active = 0;
 	sai_dev->buf_num = 0;
+	sai_device.sai_cur_buf = NULL;
 
 	HAL_SAI_Receive_DMA(sai_device.sai_hw_dev, (uint8_t *)&sai_device.sai_buf[0], sizeof(sai_device.sai_buf) / 4);
 

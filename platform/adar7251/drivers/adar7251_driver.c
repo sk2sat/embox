@@ -184,19 +184,21 @@ void adar7251_prepare(struct adar7251_dev *dev, int ch_num) {
 	gpio_set(ADC_START_PORT, ADC_START_PIN, GPIO_PIN_HIGH);
 
 	adar_ctrl_port_init(dev);
-    sleep(1);
+    usleep(100);
 	adar_scan_flash(dev);
-	sleep(1);
+	usleep(100);
 	adar_preset_pll(dev);
-	sleep(1);
+	usleep(100);
 	adar_preset(dev, ch_num);
-	sleep(1);
+	usleep(100);
 
-	sai_prepare(dev->sai_dev, ch_num);
+	dev->conf.chan_num = ch_num;
 }
 
 void adar7251_start(struct adar7251_dev *dev) {
-	sai_start(dev->sai_dev, 0);
+	sai_prepare(dev->sai_dev, dev->conf.chan_num);
+
+	sai_start(dev->sai_dev, dev->conf.chan_num);
 
 	//gpio_set(ADC_START_PORT, ADC_START_PIN, GPIO_PIN_LOW);
 }
