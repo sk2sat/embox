@@ -20,9 +20,9 @@ struct sai_device {
 	int (*sai_callback)(const void *input, unsigned long frameCount, void *userData );
 	void *sai_user_data;
 
-	volatile int sai_active;
-	volatile uint8_t *sai_cur_buf;
-	volatile int buf_num;
+	int volatile sai_active;
+	uint8_t volatile*sai_cur_buf;
+	int volatile buf_num;
 
 	struct __SAI_HandleTypeDef *sai_hw_dev;
 };
