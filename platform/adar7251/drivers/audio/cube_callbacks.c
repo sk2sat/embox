@@ -24,6 +24,7 @@ void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai) {
 	UNUSED(hsai);
 
 	if (!sai_device.sai_active) {
+		sai_device.buf_num ++;
 		return;
 	}
 	if (sai_device.sai_cur_buf) {
@@ -52,6 +53,7 @@ void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai) {
 	UNUSED(hsai);
 
 	if (!sai_device.sai_active) {
+		sai_device.buf_num ++;
 		return;
 	}
 	if (sai_device.sai_cur_buf) {
