@@ -129,6 +129,7 @@ struct sai_device *sai_init(void) {
 	sai_device.sai_hw_dev = &hsai_BlockA1;
 	sai_device.sai_active = 0;
 	sai_device.sai_cur_buf = NULL;
+	sai_device.buf_num = 0;
 
 	/* Initialize all configured peripherals */
 	sai_gpio_init();
@@ -149,17 +150,23 @@ void sai_prepare(struct sai_device *sai_dev, int channels) {
 }
 
 void sai_start(struct sai_device *sai_dev, int channels) {
+
 	sai_dev->sai_active = 0;
-	sai_dev->buf_num = 0;
 	sai_device.sai_cur_buf = NULL;
 
-	HAL_SAI_Receive_DMA(sai_device.sai_hw_dev, (uint8_t *)&sai_device.sai_buf[0], sizeof(sai_device.sai_buf) / 4);
+	if(sai_dev->buf_num == 0) {
+		HAL_SAI_Receive_DMA(sai_device.sai_hw_dev, (uint8_t *)&sai_device.sai_buf[0], sizeof(sai_device.sai_buf) / 4);
+	}
 
-//	sai_dev->sai_cur_buf = NULL;
 }
 
 void sai_stop(struct sai_device *sai_dev) {
-	HAL_SAI_DMAStop(sai_device.sai_hw_dev);
+	//HAL_SAI_DMAStop(sai_device.sai_hw_dev);
+	//HAL_SAI_Abort(sai_device.sai_hw_dev);
+	sai_dev->sai_active = 0;
+}
+
+void sai_deinit(struct sai_device *sai_dev) {
 	HAL_SAI_DeInit(sai_device.sai_hw_dev);
 }
 
