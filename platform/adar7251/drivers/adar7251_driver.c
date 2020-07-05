@@ -193,10 +193,11 @@ void adar7251_prepare(struct adar7251_dev *dev, int ch_num) {
 	usleep(100);
 
 	dev->conf.chan_num = ch_num;
+
+	sai_prepare(dev->sai_dev, dev->conf.chan_num);
 }
 
 void adar7251_start(struct adar7251_dev *dev) {
-	sai_prepare(dev->sai_dev, dev->conf.chan_num);
 
 	sai_start(dev->sai_dev, dev->conf.chan_num);
 
