@@ -36,6 +36,9 @@ static inline int frame_send(int s, struct sockaddr_in *si_other, socklen_t slen
 			continue;
 		}
 
+		if (i == 95) {
+			adar7251_frame_stop(&adar7251_dev);
+		}
 		if (sendto(s, rx_buf, data_len, 0, (void *) si_other, slen)==-1) {
 			adar7251_frame_stop(&adar7251_dev);
 			adar7251_stop(&adar7251_dev);
